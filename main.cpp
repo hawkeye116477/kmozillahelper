@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 
     // This shows on file dialogs
-    KAboutData about("kmozillahelper", i18n("Mozilla Firefox"), APP_HELPER_VERSION);
+    KAboutData about("kwaterfoxhelper", i18n("Waterfox"), APP_HELPER_VERSION);
     about.setBugAddress("https://bugzilla.opensuse.org/enter_bug.cgi");
     KAboutData::setApplicationData(about);
     QApplication::setQuitOnLastWindowClosed(false);
@@ -189,7 +189,7 @@ bool Helper::handleGetProxy()
     }
     QUrl proxyurl = QUrl::fromUserInput(proxy);
     if(proxyurl.isValid())
-    { // firefox wants this format
+    { // waterfox wants this format
         outputLine("PROXY" " " + proxyurl.host() + ":" + QString::number(proxyurl.port()));
         // TODO there is also "SOCKS " type
         return true;
@@ -237,7 +237,7 @@ bool Helper::handleGetFromType()
     QMimeType mime = QMimeDatabase().mimeTypeForName(type);
     if(mime.isValid())
         return writeMimeInfo(mime);
-    // firefox also asks for protocol handlers using getfromtype
+    // waterfox also asks for protocol handlers using getfromtype
     QString app = getAppForProtocol(type);
     if(!app.isEmpty())
     {
@@ -500,7 +500,7 @@ bool Helper::handleGetDefaultFeedReader()
 {
     if(!readArguments(0))
         return false;
-    // firefox wants the full path
+    // waterfox wants the full path
     QString reader = QStandardPaths::findExecutable("akregator"); // TODO there is no KDE setting for this
     if(!reader.isEmpty())
     {
@@ -553,9 +553,9 @@ bool Helper::handleIsDefaultBrowser()
         return false;
     QString browser = KConfigGroup(KSharedConfig::openConfig("kdeglobals"), "General")
             .readEntry("BrowserApplication");
-    return browser == "MozillaFirefox" || browser == "MozillaFirefox.desktop"
-            || browser == "!firefox" || browser == "!/usr/bin/firefox"
-            || browser == "firefox" || browser == "firefox.desktop";
+    return browser == "Waterfox" || browser == "Waterfox.desktop"
+            || browser == "!waterfox" || browser == "!/usr/bin/waterfox"
+            || browser == "waterfox" || browser == "waterfox.desktop";
 }
 
 bool Helper::handleSetDefaultBrowser()
@@ -566,7 +566,7 @@ bool Helper::handleSetDefaultBrowser()
     if(!allArgumentsUsed())
         return false;
     KConfigGroup(KSharedConfig::openConfig("kdeglobals"), "General")
-            .writeEntry("BrowserApplication", "firefox");
+            .writeEntry("BrowserApplication", "waterfox");
     if(alltypes)
     {
         // TODO there is no API for this and it is a bit complex
@@ -584,7 +584,7 @@ bool Helper::handleDownloadFinished()
     // TODO cheat a bit due to i18n freeze - the strings are in the .notifyrc file,
     // taken from KGet, but the notification itself needs the text too.
     // So create it from there.
-    KConfig cfg("kmozillahelper.notifyrc", KConfig::FullConfig, QStandardPaths::AppDataLocation);
+    KConfig cfg("kwaterfoxhelper.notifyrc", KConfig::FullConfig, QStandardPaths::AppDataLocation);
     QString message = KConfigGroup(&cfg, "Event/downloadfinished").readEntry("Comment");
     KNotification::event("downloadfinished", download + " : " + message);
     return true;

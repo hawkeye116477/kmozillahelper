@@ -1,2 +1,2 @@
-# kmozillahelper
-KDE mozilla integration
+# kwaterfoxhelper
+Modified OpenSuse's kmozillahelper to make KDE Waterfox integration

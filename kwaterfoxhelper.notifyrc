@@ -1,6 +1,6 @@
 [Global]
-IconName=firefox
-Comment=Firefox
+IconName=waterfox
+Comment=Waterfox
 
 # this is borrowed from KGet
 [Event/downloadfinished]
