@@ -19,5 +19,5 @@ add_executable(kwaterfoxhelper main.cpp)
 
 target_link_libraries(kwaterfoxhelper KF5::I18n KF5::KIOWidgets KF5::Notifications KF5::WindowSystem)
 
-install(TARGETS kwaterfoxhelper DESTINATION /opt/waterfox/)
+install(TARGETS kwaterfoxhelper DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/waterfox/)
 install(FILES kwaterfoxhelper.notifyrc DESTINATION ${KNOTIFYRC_INSTALL_DIR})
