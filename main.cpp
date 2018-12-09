@@ -57,7 +57,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 int main(int argc, char* argv[])
 {
+    // Enable high-DPI scaling (required Qt >= 5.6).
+#if(QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+#endif
 
     QApplication app(argc, argv);
 
