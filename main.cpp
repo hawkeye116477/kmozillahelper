@@ -53,11 +53,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //#define DEBUG_KDE
 
 #define HELPER_VERSION 6
-#define APP_HELPER_VERSION "5.0.2"
+#define APP_HELPER_VERSION "5.0.3"
 
 int main(int argc, char* argv[])
 {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+
     QApplication app(argc, argv);
+
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 
     // This shows on file dialogs
     KAboutData about("kwaterfoxhelper", i18n("Waterfox"), APP_HELPER_VERSION);
@@ -95,6 +99,14 @@ void Helper::readCommand()
         QCoreApplication::exit();
         return;
     }
+
+    /* Allow multiple commands at once.
+       Waterfox nests the event loop in the same way we do,
+       so if a file dialog is open, another command may arrive which we handle
+       in our nested event loop...
+    // For now we only allow one command at once.
+    // We need to do this as dialogs spawn their own eventloop and thus they get nested...
+    notifier.setEnabled(false); */
 
 #ifdef DEBUG_KDE
     std::cerr << "COMMAND: " << command.toStdString() << std::endl;
@@ -153,6 +165,8 @@ void Helper::readCommand()
     // in normal data (\ is escaped otherwise)
     outputLine(status ? "\\1" : "\\0", false); // do not escape
 
+    /* See comment on setEnabled above
+    notifier.setEnabled(true); */
 }
 
 bool Helper::handleCheck()
