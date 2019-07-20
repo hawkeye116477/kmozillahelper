@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
     // This shows on file dialogs
     KAboutData about("kwaterfoxhelper", i18n("Waterfox"), APP_HELPER_VERSION);
-    about.setBugAddress("https://bugzilla.opensuse.org/enter_bug.cgi");
+    about.setBugAddress("https://github.com/hawkeye116477/kwaterfoxhelper/issues");
     KAboutData::setApplicationData(about);
     QApplication::setQuitOnLastWindowClosed(false);
 
