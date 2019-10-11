@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "main.h"
 
 #include <cassert>
+#include <kio_version.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -54,7 +56,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //#define DEBUG_KDE
 
 #define HELPER_VERSION 6
-#define APP_HELPER_VERSION "5.0.4"
+#define APP_HELPER_VERSION "5.0.5"
 
 int main(int argc, char* argv[])
 {
@@ -67,8 +69,18 @@ int main(int argc, char* argv[])
 
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
 
+
+    // Check whether we're called from Waterfox Classic or Current
+    QString appname = i18n("Waterfox Classic");
+    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
+    if(parent.contains("waterfox-current", Qt::CaseInsensitive))
+    {
+        appname = i18n("Waterfox Current");
+    }
+
+
     // This shows on file dialogs
-    KAboutData about("kwaterfoxhelper", i18n("Waterfox"), APP_HELPER_VERSION);
+    KAboutData about("kwaterfoxhelper", appname, APP_HELPER_VERSION);
     about.setBugAddress("https://github.com/hawkeye116477/kwaterfoxhelper/issues");
     KAboutData::setApplicationData(about);
     QApplication::setQuitOnLastWindowClosed(false);
@@ -471,7 +483,11 @@ bool Helper::handleOpen()
     QMimeType mimeType = QMimeDatabase().mimeTypeForName(mime);
     if(!mime.isEmpty() && mimeType.isValid() && KMimeTypeTrader::self()->preferredService(mimeType.name()))
     {
-        return KRun::runUrl(url, mime, NULL, KRun::RunFlags()); // TODO parent
+        #if KIO_VERSION < QT_VERSION_CHECK(5, 31, 0)
+            return KRun::runUrl(url, mime, NULL); // TODO parent
+        #else
+            return KRun::runUrl(url, mime, NULL, KRun::RunFlags()); // TODO parent
+        #endif
     }
     else
     {
@@ -575,9 +591,17 @@ bool Helper::handleIsDefaultBrowser()
         return false;
     QString browser = KConfigGroup(KSharedConfig::openConfig("kdeglobals"), "General")
             .readEntry("BrowserApplication");
-    return browser == "Waterfox" || browser == "Waterfox.desktop"
-            || browser == "!waterfox" || browser == "!/usr/bin/waterfox"
-            || browser == "waterfox" || browser == "waterfox.desktop";
+    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
+    if(parent.contains("waterfox-current", Qt::CaseInsensitive))
+    {
+        return browser == "!waterfox-current" || browser == "!/usr/bin/waterfox-current"
+        || browser == "waterfox-current" || browser == "waterfox-current.desktop";
+    }
+    else
+    {
+        return browser == "!waterfox" || browser == "!/usr/bin/waterfox"
+        || browser == "waterfox" || browser == "waterfox.desktop";
+    }
 }
 
 bool Helper::handleSetDefaultBrowser()
@@ -587,8 +611,14 @@ bool Helper::handleSetDefaultBrowser()
     bool alltypes = (getArgument() == "ALLTYPES");
     if(!allArgumentsUsed())
         return false;
+    QString appfilename = "waterfox";
+    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
+    if(parent.contains("waterfox-current", Qt::CaseInsensitive))
+    {
+        appfilename = "waterfox-current";
+    }
     KConfigGroup(KSharedConfig::openConfig("kdeglobals"), "General")
-            .writeEntry("BrowserApplication", "waterfox");
+            .writeEntry("BrowserApplication", appfilename);
     if(alltypes)
     {
         // TODO there is no API for this and it is a bit complex
