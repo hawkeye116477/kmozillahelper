@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
+#include <QSettings>
 #include <QWindow>
 
 #include <KConfigCore/KConfigGroup>
@@ -56,7 +57,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //#define DEBUG_KDE
 
 #define HELPER_VERSION 6
-#define APP_HELPER_VERSION "5.0.5"
+#define APP_HELPER_VERSION "5.0.6"
 
 int main(int argc, char* argv[])
 {
@@ -71,11 +72,14 @@ int main(int argc, char* argv[])
 
 
     // Check whether we're called from Waterfox Classic or Current
-    QString appname = i18n("Waterfox Classic");
+    QString appname = "Waterfox";
     QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
-    if(parent.contains("waterfox-current", Qt::CaseInsensitive))
+    QString parentPath = parent.mid(0, parent.lastIndexOf("waterfox"));
+    QSettings settings(parentPath + "application.ini", QSettings::IniFormat);
+    QString codename = settings.value("App/CodeName").toString();
+    if(codename != "")
     {
-        appname = i18n("Waterfox Current");
+        appname = codename;
     }
 
 
