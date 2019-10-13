@@ -59,6 +59,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define HELPER_VERSION 6
 #define APP_HELPER_VERSION "5.0.6"
 
+
+QString getParent()
+{
+    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
+    return parent;
+}
+
 int main(int argc, char* argv[])
 {
     // Enable high-DPI scaling (required Qt >= 5.6).
@@ -73,8 +80,7 @@ int main(int argc, char* argv[])
 
     // Check whether we're called from Waterfox Classic or Current
     QString appname = "Waterfox";
-    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
-    QString parentPath = parent.mid(0, parent.lastIndexOf("waterfox"));
+    QString parentPath = getParent().mid(0, getParent().lastIndexOf("waterfox"));
     QSettings settings(parentPath + "application.ini", QSettings::IniFormat);
     QString codename = settings.value("App/CodeName").toString();
     if(codename != "")
@@ -589,23 +595,20 @@ bool Helper::handleOpenNews()
     return false;
 }
 
+QString getParentName()
+{
+    QString parentname = getParent().mid(getParent().lastIndexOf("/") + 1);
+    return parentname;
+}
+
 bool Helper::handleIsDefaultBrowser()
 {
     if(!readArguments(0))
         return false;
     QString browser = KConfigGroup(KSharedConfig::openConfig("kdeglobals"), "General")
             .readEntry("BrowserApplication");
-    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
-    if(parent.contains("waterfox-current", Qt::CaseInsensitive))
-    {
-        return browser == "!waterfox-current" || browser == "!/usr/bin/waterfox-current"
-        || browser == "waterfox-current" || browser == "waterfox-current.desktop";
-    }
-    else
-    {
-        return browser == "!waterfox" || browser == "!/usr/bin/waterfox"
-        || browser == "waterfox" || browser == "waterfox.desktop";
-    }
+    return browser == "!" + getParentName() || browser == "!/usr/bin/" + getParentName()
+    || browser == getParentName() || browser == getParentName() + ".desktop";
 }
 
 bool Helper::handleSetDefaultBrowser()
@@ -615,14 +618,8 @@ bool Helper::handleSetDefaultBrowser()
     bool alltypes = (getArgument() == "ALLTYPES");
     if(!allArgumentsUsed())
         return false;
-    QString appfilename = "waterfox";
-    QString parent = QFile::symLinkTarget(QStringLiteral("/proc/%1/exe").arg(int(getppid())));
-    if(parent.contains("waterfox-current", Qt::CaseInsensitive))
-    {
-        appfilename = "waterfox-current";
-    }
     KConfigGroup(KSharedConfig::openConfig("kdeglobals"), "General")
-            .writeEntry("BrowserApplication", appfilename);
+            .writeEntry("BrowserApplication", getParentName());
     if(alltypes)
     {
         // TODO there is no API for this and it is a bit complex
