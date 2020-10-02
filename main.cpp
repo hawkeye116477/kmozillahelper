@@ -68,6 +68,9 @@ QString getParent()
 
 int main(int argc, char* argv[])
 {
+    // Avoid getting started by the session manager
+    qunsetenv("SESSION_MANAGER");
+
     // Enable high-DPI scaling (required Qt >= 5.6).
 #if(QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
